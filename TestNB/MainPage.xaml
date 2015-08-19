@@ -1,0 +1,26 @@
+﻿<Page
+    x:Class="TestNB.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:TestNB"
+    xmlns:nb="using:NumberBox"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+            <nb:NumberBox x:Name="nBox" Prefix="Testing! " DecimalPlaces="3" AllowNegativeValues="True" Postfix=" Testing!" />
+            <Button Content="Update Number box from Text Below" Click="ClickText" />
+            <TextBox x:Name ="tBox" Text="0.00" />
+            <Button Content="Update to 1" Click="Click1" />
+            <Button Content="Update to 505" Click="Click505" />
+            <Button Content="Update to 3.1" Click="Click31" />
+            <Button Content="Update to 3.1415926" Click="ClickPi"/>
+            <Button Content="Get Values!" Click="ClickGet" />
+            <TextBlock x:Name="sValue" />
+            <TextBlock x:Name="nValue" />
+        </StackPanel>
+    </Grid>
+</Page>

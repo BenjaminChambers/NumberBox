@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -23,21 +24,17 @@ namespace NumberBox
 
             InputScope = scope;
 
-            Evaluate();
+            RefreshText();
+            RefreshNumber();
         }
 
         // Public Dependency Properties
-        new public string Text
-        {
-            get { return base.Text; }
-            set { Evaluate(value); }
-        }
         public double Number {
             get { return (double)GetValue(NumberProperty); }
             set { SetValue(NumberProperty, value); }
         }
 
-        public bool IsNegative { get { return (bool)GetValue(IsNegativeProperty); } set { SetValue(IsNegativeProperty, value); } }
+        public bool IsNegative { get { return (bool)GetValue(IsNegativeProperty); } set { SetValue(IsNegativeProperty, value); RefreshText(); RefreshNumber(); } }
 
         public int DecimalPlaces
         {
@@ -45,17 +42,29 @@ namespace NumberBox
             set
             {
                 if (value >= 0)
+                {
                     SetValue(DecimalPlacesProperty, value);
-                else
-                    SetValue(DecimalPlacesProperty, 0);
 
-                Evaluate();
+                    while (_mantissa.Count > DecimalPlaces)
+                        _mantissa.RemoveAt(_mantissa.Count - 1);
+
+                    while (_mantissa.Count < DecimalPlaces)
+                        _mantissa.Add(0);
+                }
+                else
+                {
+                    SetValue(DecimalPlacesProperty, 0);
+                    _mantissa.Clear();
+                }
+
+                RefreshText();
+                RefreshNumber();
             }
         }
 
-        public bool AllowNegativeValues { get { return (bool)GetValue(AllowNegativeValuesProperty); } set { SetValue(AllowNegativeValuesProperty, value); Evaluate(); } }
-        public string Prefix { get { return (string)GetValue(PrefixProperty); } set { SetValue(PrefixProperty, value); Evaluate(); } }
-        public string Postfix { get { return (string)GetValue(PostfixProperty); } set { SetValue(PostfixProperty, value); Evaluate(); } }
+        public bool AllowNegativeValues { get { return (bool)GetValue(AllowNegativeValuesProperty); } set { SetValue(AllowNegativeValuesProperty, value); } }
+        public string Prefix { get { return (string)GetValue(PrefixProperty); } set { SetValue(PrefixProperty, value); RefreshText(); } }
+        public string Postfix { get { return (string)GetValue(PostfixProperty); } set { SetValue(PostfixProperty, value); RefreshText(); } }
 
 
         public static readonly DependencyProperty NumberProperty =
@@ -123,89 +132,115 @@ namespace NumberBox
             }
 
             e.Handled = true;
-            Evaluate();
+            RefreshText();
+            RefreshNumber();
         }
 
         // Callbacks
         private void OnTextChanged(object sender, TextChangedEventArgs e)
         {
-            Evaluate(Text);
+            if (!_processing)
+            {
+                _processing = true;
+                ReadString(Text);
+                RefreshText();
+                RefreshNumber();
+                _processing = false;
+            }
         }
 
         private static void OnNumberChanged(DependencyObject source, DependencyPropertyChangedEventArgs e)
         {
-            NumberBox nb = source as NumberBox;
+            var src = source as NumberBox;
 
-            if (nb._suppressParsing == false)
-                nb.Text = e.NewValue.ToString();
+            if (!src._processing)
+            {
+                src._processing = true;
+                src.ReadString(((double)e.NewValue).ToString());
+                src.RefreshText();
+                src._processing = false;
+            }
         }
 
         // Internal
         List<int> _digits = new List<int>();
-        private bool _suppressParsing = false;
+        List<int> _characteristic = new List<int>();
+        List<int> _mantissa = new List<int>();
 
+        private bool _processing = false;
 
-        private void Evaluate()
+        private void RefreshText()
         {
-            StringBuilder whole = new StringBuilder();
-            StringBuilder part = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
 
-            // Remove leading zeroes
-            while ((_digits.Count > 0) && (_digits[0] == 0))
-                _digits.RemoveAt(0);
+            sb.Append(Prefix);
 
-            // Add back any required leading zeroes
-            while (_digits.Count <= DecimalPlaces)
-                _digits.Insert(0, 0);
-
-            // Create strings of numbers with separators
-            int separation = _digits.Count - DecimalPlaces;
-            var work = _digits.Take(separation);
-            int i = separation;
-            foreach (int num in work)
+            for (int i=0; i<_characteristic.Count; i++)
             {
-                whole.Append(num.ToString());
-                if ((i % 3 == 1) && (i > 1))
-                    whole.Append(NumberFormatInfo.CurrentInfo.NumberGroupSeparator);
-                i--;
+                sb.Append(_characteristic[i].ToString());
+                if ((i%3==1)&&(i>1))
+                    sb.Append(NumberFormatInfo.CurrentInfo.NumberGroupSeparator);
             }
 
-            for (i = separation; i < _digits.Count; i++)
-                part.Append(_digits[i].ToString());
+            sb.Append(NumberFormatInfo.CurrentInfo.NumberDecimalSeparator);
 
-            // Evaluate those strings
-            string temp = (IsNegative ? NumberFormatInfo.CurrentInfo.NegativeSign : "")
-                + whole.ToString()
-                + (DecimalPlaces > 0 ? NumberFormatInfo.CurrentInfo.NumberDecimalSeparator + part.ToString() : "");
-            SetNumber(double.Parse(temp));
-            base.Text = Prefix + temp + Postfix;
+            foreach (int num in _mantissa)
+                sb.Append(num.ToString());
+
+            sb.Append(Postfix);
+
+            Text = sb.ToString();
         }
 
-        private void Evaluate(string s)
+        private void RefreshNumber()
         {
-            _digits.Clear();
-            IsNegative = false;
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append("0");
+            foreach (int num in _characteristic)
+                sb.Append(num);
+            sb.Append(NumberFormatInfo.CurrentInfo.NumberDecimalSeparator);
+            foreach (int num in _mantissa)
+                sb.Append(num);
+            sb.Append("0");
+
+            string temp = sb.ToString();
+            Number = double.Parse(temp);
+        }
+
+        private void ReadString(string value)
+        {
+            bool neg = false;
+
             if (AllowNegativeValues)
             {
-                foreach (char c in s)
-                    if (c == '-')
-                        IsNegative = !IsNegative;
+                foreach (char c in value)
+                    neg = !neg;
             }
 
-            foreach (char c in s)
+            int place = 0;
+            _characteristic.Clear();
+            _mantissa.Clear();
+            while ((place < value.Count()) && (value[place] != '.'))
             {
-                if (char.IsDigit(c))
-                    _digits.Add(int.Parse(c.ToString()));
+                if (char.IsDigit(value[place]))
+                    _characteristic.Add(int.Parse(value[place].ToString()));
+                place++;
             }
-
-            Evaluate();
-        }
-
-        private void SetNumber(double value)
-        {
-            _suppressParsing = true;
-            Number = value;
-            _suppressParsing = false;
+            while (place < value.Count())
+            {
+                if (char.IsDigit(value[place]))
+                    _mantissa.Add(int.Parse(value[place].ToString()));
+                place++;
+            }
+            while (_mantissa.Count < DecimalPlaces)
+            {
+                _mantissa.Add(0);
+            }
+            while (_mantissa.Count > DecimalPlaces)
+            {
+                _mantissa.RemoveAt(_mantissa.Count - 1);
+            }
         }
     }
 }
