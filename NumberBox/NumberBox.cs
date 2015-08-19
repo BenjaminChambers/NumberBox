@@ -32,6 +32,11 @@ namespace NumberBox
             get { return base.Text; }
             set { Evaluate(value); }
         }
+        public double Number
+        {
+            get { return (double)GetValue(NumberProperty); }
+            set { Evaluate(value.ToString()); }
+        }
 
         public bool IsNegative { get { return (bool)GetValue(IsNegativeProperty); } set { SetValue(IsNegativeProperty, value); } }
 
@@ -53,7 +58,6 @@ namespace NumberBox
         public string Prefix { get { return (string)GetValue(PrefixProperty); } set { SetValue(PrefixProperty, value); Evaluate(); } }
         public string Postfix { get { return (string)GetValue(PostfixProperty); } set { SetValue(PostfixProperty, value); Evaluate(); } }
 
-        public double Number { get { return (double)GetValue(NumberProperty); } private set { SetValue(NumberProperty, value); } }
 
         public static readonly DependencyProperty NumberProperty =
             DependencyProperty.Register("Number", typeof(double), typeof(NumberBox), new PropertyMetadata((double)0));
@@ -163,7 +167,7 @@ namespace NumberBox
             string temp = (IsNegative ? NumberFormatInfo.CurrentInfo.NegativeSign : "")
                 + whole.ToString()
                 + (DecimalPlaces > 0 ? NumberFormatInfo.CurrentInfo.NumberDecimalSeparator + part.ToString() : "");
-            Number = double.Parse(temp);
+            SetNumber(double.Parse(temp));
             base.Text = Prefix + temp + Postfix;
         }
 
@@ -185,6 +189,11 @@ namespace NumberBox
             }
 
             Evaluate();
+        }
+
+        private void SetNumber(double value)
+        {
+            SetValue(NumberProperty, value);
         }
     }
 }
