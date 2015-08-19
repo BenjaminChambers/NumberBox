@@ -1,6 +1,9 @@
 # NumberBox
 A calculator-style number box for Windows Desktop/Phone 8.1 and later.
 
+The control only allows digits, and places the decimal appropriately (based on the DecimalPlaces property).
+
+
 Use is simple. In your Xaml, add the correct namespace:
 ```
 xmlns:nb="using:NumberBox"
