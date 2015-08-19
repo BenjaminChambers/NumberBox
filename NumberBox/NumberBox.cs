@@ -182,10 +182,13 @@ namespace NumberBox
                     sb.Append(NumberFormatInfo.CurrentInfo.NumberGroupSeparator);
             }
 
-            sb.Append(NumberFormatInfo.CurrentInfo.NumberDecimalSeparator);
+            if (DecimalPlaces > 0)
+            {
+                sb.Append(NumberFormatInfo.CurrentInfo.NumberDecimalSeparator);
 
-            foreach (int num in _mantissa)
-                sb.Append(num.ToString());
+                foreach (int num in _mantissa)
+                    sb.Append(num.ToString());
+            }
 
             sb.Append(Postfix);
 
