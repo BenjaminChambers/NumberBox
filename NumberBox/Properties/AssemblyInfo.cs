@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("NumberBox")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("A WPF control for a textbox which only allows numbers.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("NumberBox")]
