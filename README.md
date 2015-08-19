@@ -1,5 +1,5 @@
 # NumberBox
-A calculator-style number box for Windows/Phone 8.1 and later.
+A calculator-style number box for Windows Desktop/Phone 8.1 and later.
 
 Use is simple. In your Xaml, add the correct namespace:
 ```
@@ -24,6 +24,8 @@ Then, the control itself:
 ```
 
 There are two properties you may access to get the contents:
+
 NumberBox.Text is a string representation of the number, including the prefix, postfix, and formatting (using the localized
 digit grouping separater and decimal separator).
+
 NumberBox.Number is a double representing the number itself.
