@@ -32,10 +32,9 @@ namespace NumberBox
             get { return base.Text; }
             set { Evaluate(value); }
         }
-        public double Number
-        {
+        public double Number {
             get { return (double)GetValue(NumberProperty); }
-            set { Evaluate(value.ToString()); }
+            set { SetValue(NumberProperty, value); }
         }
 
         public bool IsNegative { get { return (bool)GetValue(IsNegativeProperty); } set { SetValue(IsNegativeProperty, value); } }
@@ -60,7 +59,7 @@ namespace NumberBox
 
 
         public static readonly DependencyProperty NumberProperty =
-            DependencyProperty.Register("Number", typeof(double), typeof(NumberBox), new PropertyMetadata((double)0));
+            DependencyProperty.Register("Number", typeof(double), typeof(NumberBox), new PropertyMetadata((double)0, OnNumberChanged));
 
         public static readonly DependencyProperty DecimalPlacesProperty =
             DependencyProperty.Register("DecimalPlaces", typeof(int), typeof(NumberBox), new PropertyMetadata((int)0));
@@ -127,13 +126,24 @@ namespace NumberBox
             Evaluate();
         }
 
+        // Callbacks
         private void OnTextChanged(object sender, TextChangedEventArgs e)
         {
             Evaluate(Text);
         }
 
+        private static void OnNumberChanged(DependencyObject source, DependencyPropertyChangedEventArgs e)
+        {
+            NumberBox nb = source as NumberBox;
+
+            if (nb._suppressParsing == false)
+                nb.Text = e.NewValue.ToString();
+        }
+
         // Internal
         List<int> _digits = new List<int>();
+        private bool _suppressParsing = false;
+
 
         private void Evaluate()
         {
@@ -193,7 +203,9 @@ namespace NumberBox
 
         private void SetNumber(double value)
         {
-            SetValue(NumberProperty, value);
+            _suppressParsing = true;
+            Number = value;
+            _suppressParsing = false;
         }
     }
 }
