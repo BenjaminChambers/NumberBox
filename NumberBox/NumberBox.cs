@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -115,7 +114,8 @@ namespace NumberBox
                         _digits.RemoveAt(_digits.Count - 1);
                     break;
                 case Windows.System.VirtualKey.Subtract:
-                    IsNegative = !IsNegative;
+                    if (AllowNegativeValues)
+                        IsNegative = !IsNegative;
                     break;
             }
 
@@ -171,9 +171,12 @@ namespace NumberBox
         {
             _digits.Clear();
             IsNegative = false;
-            foreach (char c in s)
-                if (c == '-')
-                    IsNegative = !IsNegative;
+            if (AllowNegativeValues)
+            {
+                foreach (char c in s)
+                    if (c == '-')
+                        IsNegative = !IsNegative;
+            }
 
             foreach (char c in s)
             {
