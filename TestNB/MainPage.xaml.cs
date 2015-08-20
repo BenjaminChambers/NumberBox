@@ -29,7 +29,7 @@ namespace TestNB
 
         private void ClickText(object sender, RoutedEventArgs e)
         {
-            nBox.Text = tBox.Text;
+            nBox.Number = double.Parse(tBox.Text);
         }
 
         private void Click1(object sender, RoutedEventArgs e)

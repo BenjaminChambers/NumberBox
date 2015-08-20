@@ -5,6 +5,8 @@ VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NumberBox", "NumberBox\NumberBox.csproj", "{185F7F87-D3DE-417A-B583-9C7D554C1582}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestNB", "TestNB\TestNB.csproj", "{FD88C333-98B4-445F-BEC6-4CDE478070ED}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,30 @@ Global
 		{185F7F87-D3DE-417A-B583-9C7D554C1582}.Release|x64.Build.0 = Release|Any CPU
 		{185F7F87-D3DE-417A-B583-9C7D554C1582}.Release|x86.ActiveCfg = Release|Any CPU
 		{185F7F87-D3DE-417A-B583-9C7D554C1582}.Release|x86.Build.0 = Release|Any CPU
+		{FD88C333-98B4-445F-BEC6-4CDE478070ED}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{FD88C333-98B4-445F-BEC6-4CDE478070ED}.Debug|Any CPU.Build.0 = Debug|x86
+		{FD88C333-98B4-445F-BEC6-4CDE478070ED}.Debug|Any CPU.Deploy.0 = Debug|x86
+		{FD88C333-98B4-445F-BEC6-4CDE478070ED}.Debug|ARM.ActiveCfg = Debug|ARM
+		{FD88C333-98B4-445F-BEC6-4CDE478070ED}.Debug|ARM.Build.0 = Debug|ARM
+		{FD88C333-98B4-445F-BEC6-4CDE478070ED}.Debug|ARM.Deploy.0 = Debug|ARM
+		{FD88C333-98B4-445F-BEC6-4CDE478070ED}.Debug|x64.ActiveCfg = Debug|x64
+		{FD88C333-98B4-445F-BEC6-4CDE478070ED}.Debug|x64.Build.0 = Debug|x64
+		{FD88C333-98B4-445F-BEC6-4CDE478070ED}.Debug|x64.Deploy.0 = Debug|x64
+		{FD88C333-98B4-445F-BEC6-4CDE478070ED}.Debug|x86.ActiveCfg = Debug|x86
+		{FD88C333-98B4-445F-BEC6-4CDE478070ED}.Debug|x86.Build.0 = Debug|x86
+		{FD88C333-98B4-445F-BEC6-4CDE478070ED}.Debug|x86.Deploy.0 = Debug|x86
+		{FD88C333-98B4-445F-BEC6-4CDE478070ED}.Release|Any CPU.ActiveCfg = Release|x86
+		{FD88C333-98B4-445F-BEC6-4CDE478070ED}.Release|Any CPU.Build.0 = Release|x86
+		{FD88C333-98B4-445F-BEC6-4CDE478070ED}.Release|Any CPU.Deploy.0 = Release|x86
+		{FD88C333-98B4-445F-BEC6-4CDE478070ED}.Release|ARM.ActiveCfg = Release|ARM
+		{FD88C333-98B4-445F-BEC6-4CDE478070ED}.Release|ARM.Build.0 = Release|ARM
+		{FD88C333-98B4-445F-BEC6-4CDE478070ED}.Release|ARM.Deploy.0 = Release|ARM
+		{FD88C333-98B4-445F-BEC6-4CDE478070ED}.Release|x64.ActiveCfg = Release|x64
+		{FD88C333-98B4-445F-BEC6-4CDE478070ED}.Release|x64.Build.0 = Release|x64
+		{FD88C333-98B4-445F-BEC6-4CDE478070ED}.Release|x64.Deploy.0 = Release|x64
+		{FD88C333-98B4-445F-BEC6-4CDE478070ED}.Release|x86.ActiveCfg = Release|x86
+		{FD88C333-98B4-445F-BEC6-4CDE478070ED}.Release|x86.Build.0 = Release|x86
+		{FD88C333-98B4-445F-BEC6-4CDE478070ED}.Release|x86.Deploy.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

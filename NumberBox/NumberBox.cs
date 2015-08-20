@@ -25,16 +25,16 @@ namespace NumberBox
             InputScope = scope;
 
             RefreshText();
-            RefreshNumber();
         }
 
         // Public Dependency Properties
-        public double Number {
+        public double Number
+        {
             get { return (double)GetValue(NumberProperty); }
             set { SetValue(NumberProperty, value); }
         }
 
-        public bool IsNegative { get { return (bool)GetValue(IsNegativeProperty); } set { SetValue(IsNegativeProperty, value); RefreshText(); RefreshNumber(); } }
+        public bool IsNegative { get { return (bool)GetValue(IsNegativeProperty); } set { SetValue(IsNegativeProperty, value); RefreshText(); } }
 
         public int DecimalPlaces
         {
@@ -44,21 +44,13 @@ namespace NumberBox
                 if (value >= 0)
                 {
                     SetValue(DecimalPlacesProperty, value);
-
-                    while (_mantissa.Count > DecimalPlaces)
-                        _mantissa.RemoveAt(_mantissa.Count - 1);
-
-                    while (_mantissa.Count < DecimalPlaces)
-                        _mantissa.Add(0);
                 }
                 else
                 {
                     SetValue(DecimalPlacesProperty, 0);
-                    _mantissa.Clear();
                 }
 
                 RefreshText();
-                RefreshNumber();
             }
         }
 
@@ -92,38 +84,37 @@ namespace NumberBox
             {
                 case Windows.System.VirtualKey.Number0:
                 case Windows.System.VirtualKey.NumberPad0:
-                    _digits.Add(0); break;
+                    AddDigit(0); break;
                 case Windows.System.VirtualKey.Number1:
                 case Windows.System.VirtualKey.NumberPad1:
-                    _digits.Add(1); break;
+                    AddDigit(1); break;
                 case Windows.System.VirtualKey.Number2:
                 case Windows.System.VirtualKey.NumberPad2:
-                    _digits.Add(2); break;
+                    AddDigit(2); break;
                 case Windows.System.VirtualKey.Number3:
                 case Windows.System.VirtualKey.NumberPad3:
-                    _digits.Add(3); break;
+                    AddDigit(3); break;
                 case Windows.System.VirtualKey.Number4:
                 case Windows.System.VirtualKey.NumberPad4:
-                    _digits.Add(4); break;
+                    AddDigit(4); break;
                 case Windows.System.VirtualKey.Number5:
                 case Windows.System.VirtualKey.NumberPad5:
-                    _digits.Add(5); break;
+                    AddDigit(5); break;
                 case Windows.System.VirtualKey.Number6:
                 case Windows.System.VirtualKey.NumberPad6:
-                    _digits.Add(6); break;
+                    AddDigit(6); break;
                 case Windows.System.VirtualKey.Number7:
                 case Windows.System.VirtualKey.NumberPad7:
-                    _digits.Add(7); break;
+                    AddDigit(7); break;
                 case Windows.System.VirtualKey.Number8:
                 case Windows.System.VirtualKey.NumberPad8:
-                    _digits.Add(8); break;
+                    AddDigit(8); break;
                 case Windows.System.VirtualKey.Number9:
                 case Windows.System.VirtualKey.NumberPad9:
-                    _digits.Add(9); break;
+                    AddDigit(9); break;
                 case Windows.System.VirtualKey.Delete:
                 case Windows.System.VirtualKey.Back:
-                    if (_digits.Count > 0)
-                        _digits.RemoveAt(_digits.Count - 1);
+                    RemoveDigit();
                     break;
                 case Windows.System.VirtualKey.Subtract:
                     if (AllowNegativeValues)
@@ -133,119 +124,65 @@ namespace NumberBox
 
             e.Handled = true;
             RefreshText();
-            RefreshNumber();
         }
 
         // Callbacks
         private void OnTextChanged(object sender, TextChangedEventArgs e)
         {
-            if (!_processing)
-            {
-                _processing = true;
-                ReadString(Text);
-                RefreshText();
-                RefreshNumber();
-                _processing = false;
-            }
+            RefreshText();
         }
 
         private static void OnNumberChanged(DependencyObject source, DependencyPropertyChangedEventArgs e)
         {
             var src = source as NumberBox;
 
-            if (!src._processing)
+            double n = (double)e.NewValue;
+
+            if (n < 0)
             {
-                src._processing = true;
-                src.ReadString(((double)e.NewValue).ToString());
-                src.RefreshText();
-                src._processing = false;
+                if (src.AllowNegativeValues)
+                {
+                    src.IsNegative = true;
+                }
+                else
+                {
+                    src.Number = -n;
+                    src.IsNegative = false;
+                }
             }
+            else
+            {
+                src.IsNegative = false;
+            }
+
+            double multiple = Math.Pow(10, src.DecimalPlaces);
+
+            src.Number = Math.Truncate(n * multiple) / multiple;
+
+            src.RefreshText();
         }
 
         // Internal
-        List<int> _digits = new List<int>();
-        List<int> _characteristic = new List<int>();
-        List<int> _mantissa = new List<int>();
-
-        private bool _processing = false;
+        private void AddDigit(byte digit)
+        {
+            Number = Number * 10.0 + ((double)digit / Math.Pow(10, DecimalPlaces));
+        }
+        private void RemoveDigit()
+        {
+            double num = Number * Math.Pow(10, DecimalPlaces - 1);
+            num = Math.Truncate(num);
+            Number = num / Math.Pow(10, DecimalPlaces);
+        }
 
         private void RefreshText()
         {
             StringBuilder sb = new StringBuilder();
 
             sb.Append(Prefix);
-
-            for (int i=0; i<_characteristic.Count; i++)
-            {
-                sb.Append(_characteristic[i].ToString());
-                if ((i%3==1)&&(i>1))
-                    sb.Append(NumberFormatInfo.CurrentInfo.NumberGroupSeparator);
-            }
-            if (_characteristic.Count == 0)
-                sb.Append("0");
-
-            if (DecimalPlaces > 0)
-            {
-                sb.Append(NumberFormatInfo.CurrentInfo.NumberDecimalSeparator);
-
-                foreach (int num in _mantissa)
-                    sb.Append(num.ToString());
-            }
-
+            sb.Append(Number.ToString("F" + DecimalPlaces.ToString()));
             sb.Append(Postfix);
 
             Text = sb.ToString();
-        }
-
-        private void RefreshNumber()
-        {
-            StringBuilder sb = new StringBuilder();
-
-            sb.Append("0");
-            foreach (int num in _characteristic)
-                sb.Append(num);
-            sb.Append(NumberFormatInfo.CurrentInfo.NumberDecimalSeparator);
-            foreach (int num in _mantissa)
-                sb.Append(num);
-            sb.Append("0");
-
-            string temp = sb.ToString();
-            Number = double.Parse(temp);
-        }
-
-        private void ReadString(string value)
-        {
-            bool neg = false;
-
-            if (AllowNegativeValues)
-            {
-                foreach (char c in value)
-                    neg = !neg;
-            }
-
-            int place = 0;
-            _characteristic.Clear();
-            _mantissa.Clear();
-            while ((place < value.Count()) && (value[place] != '.'))
-            {
-                if (char.IsDigit(value[place]))
-                    _characteristic.Add(int.Parse(value[place].ToString()));
-                place++;
-            }
-            while (place < value.Count())
-            {
-                if (char.IsDigit(value[place]))
-                    _mantissa.Add(int.Parse(value[place].ToString()));
-                place++;
-            }
-            while (_mantissa.Count < DecimalPlaces)
-            {
-                _mantissa.Add(0);
-            }
-            while (_mantissa.Count > DecimalPlaces)
-            {
-                _mantissa.RemoveAt(_mantissa.Count - 1);
-            }
         }
     }
 }
