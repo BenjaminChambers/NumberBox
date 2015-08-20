@@ -181,6 +181,8 @@ namespace NumberBox
                 if ((i%3==1)&&(i>1))
                     sb.Append(NumberFormatInfo.CurrentInfo.NumberGroupSeparator);
             }
+            if (_characteristic.Count == 0)
+                sb.Append("0");
 
             if (DecimalPlaces > 0)
             {
