@@ -124,6 +124,7 @@ namespace NumberBox
 
             e.Handled = true;
             RefreshText();
+            RefreshNumber();
         }
 
         // Callbacks
@@ -132,31 +133,90 @@ namespace NumberBox
             RefreshText();
         }
 
+        private bool ProcessingNumberChangedCallback = false;
         private static void OnNumberChanged(DependencyObject source, DependencyPropertyChangedEventArgs e)
         {
             var src = source as NumberBox;
 
-            double n = (double)e.NewValue;
+            if (!src.ProcessingNumberChangedCallback)
+            {
+                src.ProcessingNumberChangedCallback = true;
 
-            src.IsNegative = src.AllowNegativeValues && (n < 0);
+                double n = (double)e.NewValue;
 
-            double multiple = Math.Pow(10, src.DecimalPlaces);
+                // Process negative values
+                src.IsNegative = src.AllowNegativeValues && (n < 0);
 
-            src.Number = Math.Truncate(n * multiple) / multiple;
+                // Convert to list of char
+                int decPlace = -1;
+                List<char> work = new List<char>();
 
-            src.RefreshText();
+                string s = n.ToString();
+                for (int i = 0; i < s.Count(); i++)
+                {
+                    if (s[i] == '.')
+                        decPlace = i;
+                    if (char.IsDigit(s[i]))
+                        work.Add(s[i]);
+                }
+
+                // Truncate to appropriate length
+                if (decPlace == -1)
+                    decPlace = work.Count;
+                int mantissaPlaces = work.Count - decPlace;
+
+                if (mantissaPlaces > src.DecimalPlaces)
+                    work = work.Take(decPlace + src.DecimalPlaces).ToList();
+                if (mantissaPlaces < src.DecimalPlaces)
+                {
+                    for (int i=0; i<src.DecimalPlaces- mantissaPlaces; i++)
+                        work.Add('0');
+                }
+
+                // Store
+                src._digits.Clear();
+                foreach (char c in work)
+                {
+                    switch (c)
+                    { // I know we can subtract to get the number, but I prefer to be explicit in case things change. Switch statements are highly optimized anyway
+                        case '0': src._digits.Add(0); break;
+                        case '1': src._digits.Add(1); break;
+                        case '2': src._digits.Add(2); break;
+                        case '3': src._digits.Add(3); break;
+                        case '4': src._digits.Add(4); break;
+                        case '5': src._digits.Add(5); break;
+                        case '6': src._digits.Add(6); break;
+                        case '7': src._digits.Add(7); break;
+                        case '8': src._digits.Add(8); break;
+                        case '9': src._digits.Add(9); break;
+                    }
+                }
+                // Update display
+                src.RefreshText();
+                src.RefreshNumber();
+
+                src.ProcessingNumberChangedCallback = false;
+            }
         }
 
         // Internal
-        private void AddDigit(byte digit)
+        List<byte> _digits = new List<byte>();
+
+        private void AddDigit(byte Digit)
         {
-            Number = Number * 10.0 + ((double)digit / Math.Pow(10, DecimalPlaces));
+            if ((Digit >= 0) && (Digit <= 9))
+                _digits.Add(Digit);
+
+            RefreshText();
+            RefreshNumber();
         }
         private void RemoveDigit()
         {
-            double num = Number * Math.Pow(10, DecimalPlaces - 1);
-            num = Math.Truncate(num);
-            Number = num / Math.Pow(10, DecimalPlaces);
+            if (_digits.Count > 0)
+                _digits.RemoveAt(_digits.Count - 1);
+
+            RefreshText();
+            RefreshNumber();
         }
 
         private void RefreshText()
@@ -164,10 +224,53 @@ namespace NumberBox
             StringBuilder sb = new StringBuilder();
 
             sb.Append(Prefix);
-            sb.Append(Number.ToString("F" + DecimalPlaces.ToString()));
+
+            if (IsNegative)
+                sb.Append("-");
+
+            var characteristic = _digits.Take(_digits.Count - DecimalPlaces).ToList();
+            if (characteristic.Count == 0)
+                sb.Append("0");
+            else
+            {
+                for (int i = 0; i < characteristic.Count; i++)
+                {
+                    sb.Append(characteristic[i].ToString());
+                    int distance = characteristic.Count - i;
+                    if ((distance > 1) && (distance % 3 == 1))
+                        sb.Append(NumberFormatInfo.CurrentInfo.NumberGroupSeparator);
+                }
+            }
+
+            if (DecimalPlaces > 0)
+            {
+                sb.Append(NumberFormatInfo.CurrentInfo.NumberDecimalSeparator);
+                for (int i = _digits.Count - DecimalPlaces; i < _digits.Count; i++)
+                {
+                    if (i < 0)
+                        sb.Append("0");
+                    else
+                        sb.Append(_digits[i].ToString());
+                }
+            }
+
             sb.Append(Postfix);
 
             Text = sb.ToString();
+        }
+
+        private void RefreshNumber()
+        {
+            double result = 0;
+            
+            for (int i=0; i<_digits.Count; i++)
+            {
+                int place = _digits.Count - i - DecimalPlaces-1;
+                double multiplier = Math.Pow(10, place);
+                result += (double)_digits[i] * multiplier;
+            }
+
+            Number = (IsNegative ? -result : result);
         }
     }
 }

@@ -11,7 +11,11 @@
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-            <nb:NumberBox x:Name="nBox" Prefix="Testing! " DecimalPlaces="3" AllowNegativeValues="False" Postfix=" Testing!" />
+            <nb:NumberBox x:Name="nBox"
+                          Prefix="Testing! "
+                          DecimalPlaces="3"
+                          AllowNegativeValues="True"
+                          Postfix=" Testing!" />
             <Button Content="Update Number box from Text Below" Click="ClickText" />
             <TextBox x:Name ="tBox" Text="0.00" />
             <Button Content="Update to 1" Click="Click1" />
