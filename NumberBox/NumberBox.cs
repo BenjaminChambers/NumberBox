@@ -202,7 +202,30 @@ namespace NumberBox
             StringBuilder sb = new StringBuilder();
 
             sb.Append(Prefix);
-            sb.Append(Number.ToString("F" + DecimalPlaces.ToString()));
+
+            if (IsNegative)
+                sb.Append("-");
+
+            var characteristic = _digits.Take(_digits.Count - DecimalPlaces).ToList();
+            if (characteristic.Count == 0)
+                sb.Append("0");
+            else
+            {
+                for (int i=0; i<characteristic.Count; i++)
+                {
+                    sb.Append(characteristic[i].ToString());
+                    if ((i > 1) && (i % 3 == 1))
+                        sb.Append(NumberFormatInfo.CurrentInfo.NumberGroupSeparator);
+                }
+            }
+
+            if (DecimalPlaces>0)
+            {
+                sb.Append(".");
+                for (int i = _digits.Count - DecimalPlaces; i < _digits.Count; i++)
+                    sb.Append(_digits[i].ToString());
+            }
+
             sb.Append(Postfix);
 
             Text = sb.ToString();
