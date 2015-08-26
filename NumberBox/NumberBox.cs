@@ -132,56 +132,65 @@ namespace NumberBox
             RefreshText();
         }
 
+        private bool ProcessingNumberChangedCallback = false;
         private static void OnNumberChanged(DependencyObject source, DependencyPropertyChangedEventArgs e)
         {
             var src = source as NumberBox;
 
-            double n = (double)e.NewValue;
-
-            // Process negative values
-            src.IsNegative = src.AllowNegativeValues && (n < 0);
-
-            // Convert to list of char
-            int decPlace = -1;
-            List<char> work = new List<char>();
-
-            string s = n.ToString();
-            for (int i = 0; i < s.Count(); i++)
+            if (!src.ProcessingNumberChangedCallback)
             {
-                if (s[i] == '.')
-                    decPlace = i;
-                if (char.IsDigit(s[i]))
-                    work.Add(s[i]);
-            }
+                src.ProcessingNumberChangedCallback = true;
 
-            // Truncate to appropriate length
-            if (decPlace == -1)
-                decPlace = work.Count;
-            int mantissaPlaces = work.Count - decPlace;
+                double n = (double)e.NewValue;
 
-            if (mantissaPlaces > src.DecimalPlaces)
-                work = work.Take(decPlace + src.DecimalPlaces).ToList();
+                // Process negative values
+                src.IsNegative = src.AllowNegativeValues && (n < 0);
 
-            // Store
-            src._digits.Clear();
-            foreach (char c in work)
-            {
-                switch (c)
-                { // I know we can subtract to get the number, but I prefer to be explicit in case things change. Switch statements are highly optimized anyway
-                    case '0': src._digits.Add(0); break;
-                    case '1': src._digits.Add(1); break;
-                    case '2': src._digits.Add(2); break;
-                    case '3': src._digits.Add(3); break;
-                    case '4': src._digits.Add(4); break;
-                    case '5': src._digits.Add(5); break;
-                    case '6': src._digits.Add(6); break;
-                    case '7': src._digits.Add(7); break;
-                    case '8': src._digits.Add(8); break;
-                    case '9': src._digits.Add(9); break;
+                // Convert to list of char
+                int decPlace = -1;
+                List<char> work = new List<char>();
+
+                string s = n.ToString();
+                for (int i = 0; i < s.Count(); i++)
+                {
+                    if (s[i] == '.')
+                        decPlace = i;
+                    if (char.IsDigit(s[i]))
+                        work.Add(s[i]);
                 }
+
+                // Truncate to appropriate length
+                if (decPlace == -1)
+                    decPlace = work.Count;
+                int mantissaPlaces = work.Count - decPlace;
+
+                if (mantissaPlaces > src.DecimalPlaces)
+                    work = work.Take(decPlace + src.DecimalPlaces).ToList();
+
+                // Store
+                src._digits.Clear();
+                foreach (char c in work)
+                {
+                    switch (c)
+                    { // I know we can subtract to get the number, but I prefer to be explicit in case things change. Switch statements are highly optimized anyway
+                        case '0': src._digits.Add(0); break;
+                        case '1': src._digits.Add(1); break;
+                        case '2': src._digits.Add(2); break;
+                        case '3': src._digits.Add(3); break;
+                        case '4': src._digits.Add(4); break;
+                        case '5': src._digits.Add(5); break;
+                        case '6': src._digits.Add(6); break;
+                        case '7': src._digits.Add(7); break;
+                        case '8': src._digits.Add(8); break;
+                        case '9': src._digits.Add(9); break;
+                    }
+                }
+                // Update display
+                src.RefreshText();
+                src.RefreshNumber();
+
+                src.ProcessingNumberChangedCallback = false;
             }
-            // Update display
-            src.RefreshText();
         }
 
         // Internal
