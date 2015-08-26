@@ -5,7 +5,7 @@ The control only allows digits, and places the decimal appropriately (based on t
 
 So, why should you use this?
 
-Because it's an easy way to enter numbers within a TextBox. It only allows digits to be entered, it maintains the property number of significant digits after the decimal place, and you can block negative numbers if desired.
+Because it's an easy way to enter numbers within a TextBox. It only allows digits to be entered, it maintains the proper number of significant digits after the decimal place, and you can block negative numbers if desired.
 
 
 Use is simple. In your Xaml, add the correct namespace:
