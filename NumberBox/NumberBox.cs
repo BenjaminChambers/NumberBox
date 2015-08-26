@@ -146,7 +146,7 @@ namespace NumberBox
             List<char> work = new List<char>();
 
             string s = n.ToString();
-            for (int i=0; i<s.Count(); i++)
+            for (int i = 0; i < s.Count(); i++)
             {
                 if (s[i] == '.')
                     decPlace = i;
@@ -165,7 +165,8 @@ namespace NumberBox
             // Store
             src._digits.Clear();
             foreach (char c in work)
-            { switch (c)
+            {
+                switch (c)
                 { // I know we can subtract to get the number, but I prefer to be explicit in case things change. Switch statements are highly optimized anyway
                     case '0': src._digits.Add(0); break;
                     case '1': src._digits.Add(1); break;
@@ -211,7 +212,7 @@ namespace NumberBox
                 sb.Append("0");
             else
             {
-                for (int i=0; i<characteristic.Count; i++)
+                for (int i = 0; i < characteristic.Count; i++)
                 {
                     sb.Append(characteristic[i].ToString());
                     if ((i > 1) && (i % 3 == 1))
@@ -219,11 +220,16 @@ namespace NumberBox
                 }
             }
 
-            if (DecimalPlaces>0)
+            if (DecimalPlaces > 0)
             {
                 sb.Append(NumberFormatInfo.CurrentInfo.NumberDecimalSeparator);
                 for (int i = _digits.Count - DecimalPlaces; i < _digits.Count; i++)
-                    sb.Append(_digits[i].ToString());
+                {
+                    if (i < 0)
+                        sb.Append("0");
+                    else
+                        sb.Append(_digits[i].ToString());
+                }
             }
 
             sb.Append(Postfix);
