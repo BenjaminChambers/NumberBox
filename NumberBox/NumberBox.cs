@@ -124,6 +124,7 @@ namespace NumberBox
 
             e.Handled = true;
             RefreshText();
+            RefreshNumber();
         }
 
         // Callbacks
@@ -269,7 +270,7 @@ namespace NumberBox
                 result += (double)_digits[i] * multiplier;
             }
 
-            Number = result;
+            Number = (IsNegative ? -result : result);
         }
     }
 }
