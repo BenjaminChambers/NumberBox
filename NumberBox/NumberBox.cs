@@ -221,7 +221,7 @@ namespace NumberBox
 
             if (DecimalPlaces>0)
             {
-                sb.Append(".");
+                sb.Append(NumberFormatInfo.CurrentInfo.NumberDecimalSeparator);
                 for (int i = _digits.Count - DecimalPlaces; i < _digits.Count; i++)
                     sb.Append(_digits[i].ToString());
             }
