@@ -191,11 +191,17 @@ namespace NumberBox
         {
             if ((Digit >= 0) && (Digit <= 9))
                 _digits.Add(Digit);
+
+            RefreshText();
+            RefreshNumber();
         }
         private void RemoveDigit()
         {
             if (_digits.Count > 0)
                 _digits.RemoveAt(_digits.Count - 1);
+
+            RefreshText();
+            RefreshNumber();
         }
 
         private void RefreshText()
@@ -236,6 +242,20 @@ namespace NumberBox
             sb.Append(Postfix);
 
             Text = sb.ToString();
+        }
+
+        private void RefreshNumber()
+        {
+            double result = 0;
+            
+            for (int i=0; i<_digits.Count; i++)
+            {
+                int place = _digits.Count - i - DecimalPlaces;
+                double multiplier = Math.Pow(10, place);
+                result += (double)_digits[i] * multiplier;
+            }
+
+            Number = result;
         }
     }
 }
