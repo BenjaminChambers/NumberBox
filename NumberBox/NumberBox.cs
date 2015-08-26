@@ -166,6 +166,11 @@ namespace NumberBox
 
                 if (mantissaPlaces > src.DecimalPlaces)
                     work = work.Take(decPlace + src.DecimalPlaces).ToList();
+                if (mantissaPlaces < src.DecimalPlaces)
+                {
+                    for (int i=0; i<src.DecimalPlaces- mantissaPlaces; i++)
+                        work.Add('0');
+                }
 
                 // Store
                 src._digits.Clear();
@@ -259,7 +264,7 @@ namespace NumberBox
             
             for (int i=0; i<_digits.Count; i++)
             {
-                int place = _digits.Count - i - DecimalPlaces;
+                int place = _digits.Count - i - DecimalPlaces-1;
                 double multiplier = Math.Pow(10, place);
                 result += (double)_digits[i] * multiplier;
             }
