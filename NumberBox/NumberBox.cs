@@ -138,12 +138,48 @@ namespace NumberBox
 
             double n = (double)e.NewValue;
 
+            // Process negative values
             src.IsNegative = src.AllowNegativeValues && (n < 0);
 
-            double multiple = Math.Pow(10, src.DecimalPlaces);
+            // Convert to list of char
+            int decPlace = -1;
+            List<char> work = new List<char>();
 
-            src.Number = Math.Truncate(n * multiple) / multiple;
+            string s = n.ToString();
+            for (int i=0; i<s.Count(); i++)
+            {
+                if (s[i] == '.')
+                    decPlace = i;
+                if (char.IsDigit(s[i]))
+                    work.Add(s[i]);
+            }
 
+            // Truncate to appropriate length
+            if (decPlace == -1)
+                decPlace = work.Count;
+            int mantissaPlaces = work.Count - decPlace;
+
+            if (mantissaPlaces > src.DecimalPlaces)
+                work = work.Take(decPlace + src.DecimalPlaces).ToList();
+
+            // Store
+            src._digits.Clear();
+            foreach (char c in work)
+            { switch (c)
+                { // I know we can subtract to get the number, but I prefer to be explicit in case things change. Switch statements are highly optimized anyway
+                    case '0': src._digits.Add(0); break;
+                    case '1': src._digits.Add(1); break;
+                    case '2': src._digits.Add(2); break;
+                    case '3': src._digits.Add(3); break;
+                    case '4': src._digits.Add(4); break;
+                    case '5': src._digits.Add(5); break;
+                    case '6': src._digits.Add(6); break;
+                    case '7': src._digits.Add(7); break;
+                    case '8': src._digits.Add(8); break;
+                    case '9': src._digits.Add(9); break;
+                }
+            }
+            // Update display
             src.RefreshText();
         }
 
