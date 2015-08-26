@@ -24,7 +24,7 @@ namespace NumberBox
 
             InputScope = scope;
 
-            RefreshText();
+            Refresh();
         }
 
         // Public Dependency Properties
@@ -34,7 +34,7 @@ namespace NumberBox
             set { SetValue(NumberProperty, value); }
         }
 
-        public bool IsNegative { get { return (bool)GetValue(IsNegativeProperty); } set { SetValue(IsNegativeProperty, value); RefreshText(); } }
+        public bool IsNegative { get { return (bool)GetValue(IsNegativeProperty); } set { SetValue(IsNegativeProperty, value); Refresh(); } }
 
         public int DecimalPlaces
         {
@@ -50,13 +50,13 @@ namespace NumberBox
                     SetValue(DecimalPlacesProperty, 0);
                 }
 
-                RefreshText();
+                Refresh();
             }
         }
 
         public bool AllowNegativeValues { get { return (bool)GetValue(AllowNegativeValuesProperty); } set { SetValue(AllowNegativeValuesProperty, value); } }
-        public string Prefix { get { return (string)GetValue(PrefixProperty); } set { SetValue(PrefixProperty, value); RefreshText(); } }
-        public string Postfix { get { return (string)GetValue(PostfixProperty); } set { SetValue(PostfixProperty, value); RefreshText(); } }
+        public string Prefix { get { return (string)GetValue(PrefixProperty); } set { SetValue(PrefixProperty, value); Refresh(); } }
+        public string Postfix { get { return (string)GetValue(PostfixProperty); } set { SetValue(PostfixProperty, value); Refresh(); } }
 
 
         public static readonly DependencyProperty NumberProperty =
@@ -123,83 +123,32 @@ namespace NumberBox
             }
 
             e.Handled = true;
-            RefreshText();
-            RefreshNumber();
+            Refresh();
         }
 
         // Callbacks
         private void OnTextChanged(object sender, TextChangedEventArgs e)
         {
-            RefreshText();
+            Refresh();
         }
 
-        private bool ProcessingNumberChangedCallback = false;
         private static void OnNumberChanged(DependencyObject source, DependencyPropertyChangedEventArgs e)
         {
             var src = source as NumberBox;
 
-            if (!src.ProcessingNumberChangedCallback)
+            if (!src._updating)
             {
-                src.ProcessingNumberChangedCallback = true;
+                src._updating = true;
 
-                double n = (double)e.NewValue;
+                src.ReadString(((double)e.NewValue).ToString());
+                src.Refresh();
 
-                // Process negative values
-                src.IsNegative = src.AllowNegativeValues && (n < 0);
-
-                // Convert to list of char
-                int decPlace = -1;
-                List<char> work = new List<char>();
-
-                string s = n.ToString();
-                for (int i = 0; i < s.Count(); i++)
-                {
-                    if (s[i] == '.')
-                        decPlace = i;
-                    if (char.IsDigit(s[i]))
-                        work.Add(s[i]);
-                }
-
-                // Truncate to appropriate length
-                if (decPlace == -1)
-                    decPlace = work.Count;
-                int mantissaPlaces = work.Count - decPlace;
-
-                if (mantissaPlaces > src.DecimalPlaces)
-                    work = work.Take(decPlace + src.DecimalPlaces).ToList();
-                if (mantissaPlaces < src.DecimalPlaces)
-                {
-                    for (int i=0; i<src.DecimalPlaces- mantissaPlaces; i++)
-                        work.Add('0');
-                }
-
-                // Store
-                src._digits.Clear();
-                foreach (char c in work)
-                {
-                    switch (c)
-                    { // I know we can subtract to get the number, but I prefer to be explicit in case things change. Switch statements are highly optimized anyway
-                        case '0': src._digits.Add(0); break;
-                        case '1': src._digits.Add(1); break;
-                        case '2': src._digits.Add(2); break;
-                        case '3': src._digits.Add(3); break;
-                        case '4': src._digits.Add(4); break;
-                        case '5': src._digits.Add(5); break;
-                        case '6': src._digits.Add(6); break;
-                        case '7': src._digits.Add(7); break;
-                        case '8': src._digits.Add(8); break;
-                        case '9': src._digits.Add(9); break;
-                    }
-                }
-                // Update display
-                src.RefreshText();
-                src.RefreshNumber();
-
-                src.ProcessingNumberChangedCallback = false;
+                src._updating = false;
             }
         }
 
         // Internal
+        private bool _updating = false;
         List<byte> _digits = new List<byte>();
 
         private void AddDigit(byte Digit)
@@ -207,16 +156,63 @@ namespace NumberBox
             if ((Digit >= 0) && (Digit <= 9))
                 _digits.Add(Digit);
 
-            RefreshText();
-            RefreshNumber();
+            Refresh();
         }
         private void RemoveDigit()
         {
             if (_digits.Count > 0)
                 _digits.RemoveAt(_digits.Count - 1);
 
+            Refresh();
+        }
+
+        private void Refresh()
+        {
             RefreshText();
             RefreshNumber();
+        }
+
+        private void ReadString(string s)
+        {
+            // Process negative values
+            IsNegative = AllowNegativeValues && (s[0]=='-');
+
+            // Convert to list of char
+            List<char> characteristic = new List<char>();
+            List<char> mantissa = new List<char>();
+
+            bool inMantissa = false;
+
+            foreach (char c in s)
+            {
+                if (c == '.')
+                    inMantissa = true;
+
+                if (char.IsDigit(c))
+                {
+                    if (inMantissa)
+                        mantissa.Add(c);
+                    else
+                        characteristic.Add(c);
+                }
+            }
+
+            // Truncate to appropriate length
+            if (mantissa.Count > DecimalPlaces)
+                mantissa = mantissa.Take(DecimalPlaces).ToList();
+
+            // Pad
+            if (characteristic.Count == 0)
+                characteristic.Add('0');
+            while (mantissa.Count < DecimalPlaces)
+                mantissa.Add('0');
+
+            // Store
+            _digits.Clear();
+            foreach (char c in characteristic)
+                _digits.Add((byte)(c - '0'));
+            foreach (char c in mantissa)
+                _digits.Add((byte)(c - '0'));
         }
 
         private void RefreshText()
@@ -262,10 +258,10 @@ namespace NumberBox
         private void RefreshNumber()
         {
             double result = 0;
-            
-            for (int i=0; i<_digits.Count; i++)
+
+            for (int i = 0; i < _digits.Count; i++)
             {
-                int place = _digits.Count - i - DecimalPlaces-1;
+                int place = _digits.Count - i - DecimalPlaces - 1;
                 double multiplier = Math.Pow(10, place);
                 result += (double)_digits[i] * multiplier;
             }
