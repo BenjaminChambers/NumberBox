@@ -215,7 +215,8 @@ namespace NumberBox
                 for (int i = 0; i < characteristic.Count; i++)
                 {
                     sb.Append(characteristic[i].ToString());
-                    if ((i > 1) && (i % 3 == 1))
+                    int distance = characteristic.Count - i;
+                    if ((distance > 1) && (distance % 3 == 1))
                         sb.Append(NumberFormatInfo.CurrentInfo.NumberGroupSeparator);
                 }
             }
