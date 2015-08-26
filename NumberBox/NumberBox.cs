@@ -138,22 +138,7 @@ namespace NumberBox
 
             double n = (double)e.NewValue;
 
-            if (n < 0)
-            {
-                if (src.AllowNegativeValues)
-                {
-                    src.IsNegative = true;
-                }
-                else
-                {
-                    src.Number = -n;
-                    src.IsNegative = false;
-                }
-            }
-            else
-            {
-                src.IsNegative = false;
-            }
+            src.IsNegative = src.AllowNegativeValues && (n < 0);
 
             double multiple = Math.Pow(10, src.DecimalPlaces);
 
