@@ -148,15 +148,17 @@ namespace NumberBox
         }
 
         // Internal
-        private void AddDigit(byte digit)
+        List<byte> _digits = new List<byte>();
+
+        private void AddDigit(byte Digit)
         {
-            Number = Number * 10.0 + ((double)digit / Math.Pow(10, DecimalPlaces));
+            if ((Digit >= 0) && (Digit <= 9))
+                _digits.Add(Digit);
         }
         private void RemoveDigit()
         {
-            double num = Number * Math.Pow(10, DecimalPlaces - 1);
-            num = Math.Truncate(num);
-            Number = num / Math.Pow(10, DecimalPlaces);
+            if (_digits.Count > 0)
+                _digits.RemoveAt(_digits.Count - 1);
         }
 
         private void RefreshText()
